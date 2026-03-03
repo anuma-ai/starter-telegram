@@ -37,12 +37,14 @@ jobs:
       - name: Set worker secrets
         run: |
           echo "$TELEGRAM_BOT_TOKEN" | pnpm exec wrangler secret put TELEGRAM_BOT_TOKEN
+          echo "$PRIVY_APP_ID" | pnpm exec wrangler secret put PRIVY_APP_ID
           echo "$BOT_INFO" | pnpm exec wrangler secret put BOT_INFO
           echo "$AUTH_BASE_URL" | pnpm exec wrangler secret put AUTH_BASE_URL
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          PRIVY_APP_ID: ${{ secrets.PRIVY_APP_ID }}
           BOT_INFO: ${{ secrets.BOT_INFO }}
           AUTH_BASE_URL: ${{ secrets.WORKER_URL }}
 

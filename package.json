@@ -11,7 +11,8 @@
     "dev": "tsx src/index.ts",
     "build:cloudflare": "tsc --noEmit",
     "preview:cloudflare": "wrangler dev",
-    "deploy:cloudflare": "wrangler deploy"
+    "deploy:cloudflare": "wrangler deploy",
+    "generate": "node scripts/generate-docs.mjs"
   },
   "keywords": [
     "telegram",
@@ -23,6 +24,7 @@
   ],
   "license": "MIT",
   "dependencies": {
+    "@anuma/sdk": "1.0.0-next.20260303123239",
     "dotenv": "^16.3.1",
     "grammy": "^1.21.1"
   },

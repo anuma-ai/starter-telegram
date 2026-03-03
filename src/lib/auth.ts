@@ -1,3 +1,5 @@
+import { getApiV1CreditsBalance } from "@anuma/sdk/client";
+
 const corsHeaders: Record<string, string> = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
@@ -256,6 +258,17 @@ export async function handleAuthRequest(
       if (token && telegramUserId) {
         await config.setToken(telegramUserId, token);
         console.log(`Token saved for user ${telegramUserId}`);
+
+        // Initialize the Anuma account (triggers creation for new users)
+        try {
+          await getApiV1CreditsBalance({
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          console.log(`Account initialized for user ${telegramUserId}`);
+        } catch (e) {
+          console.warn(`Account init failed for user ${telegramUserId}:`, e);
+        }
+
         return Response.json({ success: true }, { headers: corsHeaders });
       }
       return Response.json(

@@ -6,8 +6,7 @@
   "compatibility_flags": ["nodejs_compat"],
   "minify": true,
   "vars": {
-    "ANUMA_API_URL": "https://portal.anuma-dev.ai",
-    "PRIVY_APP_ID": "cmjkga3y002g0ju0clwca9wwp"
+    "ANUMA_API_URL": "https://portal.anuma-dev.ai"
   },
   "kv_namespaces": [
     {

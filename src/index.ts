@@ -17,7 +17,12 @@ const setToken = async (userId: number, t: string) => { userTokens.set(userId, t
 const clearToken = async (userId: number) => { userTokens.delete(userId); };
 const authBaseUrl = getWebAppUrl();
 const apiUrl = process.env.ANUMA_API_URL || "https://portal.anuma-dev.ai";
-const privyAppId = process.env.PRIVY_APP_ID || "cmjkga3y002g0ju0clwca9wwp";
+const privyAppId = process.env.PRIVY_APP_ID;
+
+if (!privyAppId) {
+  console.error("PRIVY_APP_ID environment variable is not set");
+  process.exit(1);
+}
 const authPort = parseInt(process.env.AUTH_PORT || "9876", 10);
 
 // Start the auth server for the Mini App
