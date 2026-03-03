@@ -101,6 +101,7 @@ export function setupBot(bot: Bot, config: BotConfig): void {
     }
 
     const userToken = await getToken(userId);
+    console.log(`Text message from user ${userId}, token: ${userToken ? "found" : "not found"}`);
     if (!userToken) {
       await sendLoginPrompt(ctx, "Please login first to use the AI assistant:");
       return;
