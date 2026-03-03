@@ -13,20 +13,40 @@ pnpm install
 cp .env.example .env
 ```
 
-Fill in the required values in `.env`:
+### Create a Telegram bot
 
-- `TELEGRAM_BOT_TOKEN` — create a bot via [@BotFather](https://t.me/BotFather) and copy the token. Use a separate bot for development — running locally switches the bot to polling mode, which deactivates any existing webhook.
-- `PRIVY_APP_ID` — create an app at [Privy Dashboard](https://dashboard.privy.io) with Telegram login enabled
+Open [@BotFather](https://t.me/BotFather), run `/newbot`, and copy the token into `TELEGRAM_BOT_TOKEN` in `.env`. Use a separate bot for development — running locally switches the bot to polling mode, which deactivates any existing webhook.
 
-Then start the bot:
+### Expose the auth server
+
+Telegram OAuth requires a public domain, so you need to expose the local auth server (port 9876) over HTTPS. For example, with ngrok:
+
+```bash
+ngrok http 9876
+```
+
+Copy the HTTPS URL into `AUTH_BASE_URL` in `.env`.
+
+### Configure the bot domain
+
+In [@BotFather](https://t.me/BotFather), go to `/mybots` → your bot → Bot Settings → Domain, and set it to your ngrok domain (without the `https://` prefix). This allows Telegram OAuth to work from your auth page.
+
+### Set up Privy
+
+Create an app at [Privy Dashboard](https://dashboard.privy.io), then:
+
+- Go to Login Methods and enable Telegram
+- In the Telegram settings, add your bot token so Privy can verify Telegram auth
+- Under Authentication > Advanced, enable "Return user data in an identity token"
+- Copy the App ID into `PRIVY_APP_ID` in `.env`
+
+### Run the bot
 
 ```bash
 pnpm dev
 ```
 
-This runs the bot in polling mode with a local auth server on port 9876. When a user triggers `/login`, the bot sends a URL to open in a browser for authentication.
-
-To enable the native Telegram Mini App login button, expose the auth server over HTTPS (e.g. `ngrok http 9876`) and set `AUTH_BASE_URL` in `.env`.
+This starts the bot in polling mode and a local auth server on port 9876. Send `/login` to your bot in Telegram — it will show a login button that opens the Privy auth flow. After logging in, you can start chatting.
 
 ## Environment Variables
 
