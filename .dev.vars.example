@@ -2,5 +2,6 @@
 # Copy to .dev.vars and fill in values
 
 TELEGRAM_BOT_TOKEN=
+PRIVY_APP_ID=
 BOT_INFO=
 AUTH_BASE_URL=

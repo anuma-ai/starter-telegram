@@ -38,7 +38,7 @@ export default {
     ) {
       return handleAuthRequest(request, {
         setToken,
-        privyAppId: env.PRIVY_APP_ID || "cmjkga3y002g0ju0clwca9wwp",
+        privyAppId: env.PRIVY_APP_ID,
       });
     }
 

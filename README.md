@@ -8,7 +8,7 @@ Try the live bot: [@anuma_ai_bot](https://t.me/anuma_ai_bot)
 
 ```bash
 pnpm install
-cp .env.example .env    # fill in TELEGRAM_BOT_TOKEN
+cp .env.example .env    # fill in required values
 pnpm dev
 ```
 
@@ -18,7 +18,7 @@ Get a bot token from [@BotFather](https://t.me/BotFather). The bot works locally
 
 See `.env.example` for the Node.js setup and `.dev.vars.example` for Cloudflare Worker local dev.
 
-Only `TELEGRAM_BOT_TOKEN` is required to get started. Everything else has sensible defaults.
+`TELEGRAM_BOT_TOKEN` and `PRIVY_APP_ID` are required to get started. Everything else has sensible defaults.
 
 ## Cloudflare Worker Deployment
 
