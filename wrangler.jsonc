@@ -1,0 +1,18 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "starter-telegram",
+  "main": "src/worker.ts",
+  "compatibility_date": "2025-03-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "minify": true,
+  "vars": {
+    "ANUMA_API_URL": "https://portal.anuma-dev.ai",
+    "PRIVY_APP_ID": "cmjkga3y002g0ju0clwca9wwp"
+  },
+  "kv_namespaces": [
+    {
+      "binding": "TOKEN_STORE",
+      "id": "41b08151df72403892b71dc3f52225da"
+    }
+  ]
+}

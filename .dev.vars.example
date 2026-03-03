@@ -1,0 +1,11 @@
+# Secrets for local Cloudflare Worker development (wrangler dev)
+# Copy to .dev.vars and fill in values
+
+# Telegram Bot Token (from @BotFather)
+TELEGRAM_BOT_TOKEN=
+
+# Bot info JSON (run: curl https://api.telegram.org/bot<TOKEN>/getMe)
+BOT_INFO=
+
+# Public HTTPS URL where this worker is accessible
+AUTH_BASE_URL=

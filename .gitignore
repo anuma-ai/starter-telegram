@@ -26,3 +26,7 @@ pnpm-debug.log*
 
 # Test coverage
 coverage/
+
+# Cloudflare
+.wrangler/
+.dev.vars
