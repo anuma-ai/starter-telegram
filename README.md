@@ -7,8 +7,14 @@ Try the live bot: [@anuma_ai_bot](https://t.me/anuma_ai_bot)
 ## Quick Start
 
 ```bash
+git clone https://github.com/anuma-ai/starter-telegram.git
+
+cd starter-telegram
+
 pnpm install
+
 cp .env.example .env    # fill in required values
+
 pnpm dev
 ```
 
