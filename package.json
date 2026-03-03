@@ -8,7 +8,10 @@
   "scripts": {
     "build": "tsc",
     "start": "node dist/index.js",
-    "dev": "tsx src/index.ts"
+    "dev": "tsx src/index.ts",
+    "build:cloudflare": "tsc --noEmit",
+    "preview:cloudflare": "wrangler dev",
+    "deploy:cloudflare": "wrangler deploy"
   },
   "keywords": [
     "telegram",
@@ -24,8 +27,10 @@
     "grammy": "^1.21.1"
   },
   "devDependencies": {
+    "@cloudflare/workers-types": "^4.0.0",
     "@types/node": "^20.10.0",
     "tsx": "^4.7.0",
-    "typescript": "^5.3.0"
+    "typescript": "^5.3.0",
+    "wrangler": "^4.0.0"
   }
 }

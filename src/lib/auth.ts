@@ -1,24 +1,10 @@
-import http from "http";
+const corsHeaders: Record<string, string> = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type",
+};
 
-const PRIVY_APP_ID = process.env.PRIVY_APP_ID || "cmjkga3y002g0ju0clwca9wwp";
-const AUTH_PORT = parseInt(process.env.AUTH_PORT || "9876", 10);
-
-// In-memory token storage (per Telegram user ID)
-const userTokens = new Map<number, string>();
-
-export function getToken(userId: number): string | undefined {
-  return userTokens.get(userId);
-}
-
-export function setToken(userId: number, token: string): void {
-  userTokens.set(userId, token);
-}
-
-export function clearToken(userId: number): void {
-  userTokens.delete(userId);
-}
-
-const getMiniAppPage = () => `
+const getMiniAppPage = (privyAppId: string) => `
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -89,7 +75,7 @@ const getMiniAppPage = () => `
     import { createRoot } from 'react-dom/client';
     import { PrivyProvider, usePrivy, useLogin, useIdentityToken, useCreateWallet } from '@privy-io/react-auth';
 
-    const PRIVY_APP_ID = '${PRIVY_APP_ID}';
+    const PRIVY_APP_ID = '${privyAppId}';
     const tg = window.Telegram?.WebApp;
 
     // Get Telegram user ID from WebApp or URL query param (dev mode)
@@ -238,75 +224,60 @@ const getMiniAppPage = () => `
 </html>
 `;
 
-let server: http.Server | null = null;
+// Web Request/Response handler (used by both CF Worker and dev server)
+export async function handleAuthRequest(
+  request: Request,
+  config: {
+    setToken: (userId: number, token: string) => Promise<void>;
+    privyAppId: string;
+  }
+): Promise<Response> {
+  const url = new URL(request.url);
 
-export function startAuthServer(): void {
-  if (server) return;
+  if (request.method === "OPTIONS") {
+    return new Response(null, { status: 204, headers: corsHeaders });
+  }
 
-  server = http.createServer((req, res) => {
-    res.setHeader("Access-Control-Allow-Origin", "*");
-    res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
-    res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+  if (
+    request.method === "GET" &&
+    (url.pathname === "/" || url.pathname.startsWith("/login"))
+  ) {
+    return new Response(getMiniAppPage(config.privyAppId), {
+      headers: { ...corsHeaders, "Content-Type": "text/html" },
+    });
+  }
 
-    if (req.method === "OPTIONS") {
-      res.writeHead(204);
-      res.end();
-      return;
+  if (request.method === "POST" && url.pathname === "/callback") {
+    try {
+      const { token, telegramUserId } = (await request.json()) as {
+        token?: string;
+        telegramUserId?: number;
+      };
+      if (token && telegramUserId) {
+        await config.setToken(telegramUserId, token);
+        console.log(`Token saved for user ${telegramUserId}`);
+        return Response.json({ success: true }, { headers: corsHeaders });
+      }
+      return Response.json(
+        { error: "Missing token or userId" },
+        { status: 400, headers: corsHeaders }
+      );
+    } catch {
+      return Response.json(
+        { error: "Invalid request" },
+        { status: 400, headers: corsHeaders }
+      );
     }
+  }
 
-    // Mini App page
-    if (req.method === "GET" && (req.url === "/" || req.url?.startsWith("/login"))) {
-      res.writeHead(200, { "Content-Type": "text/html" });
-      res.end(getMiniAppPage());
-      return;
-    }
-
-    // Callback from Mini App
-    if (req.method === "POST" && req.url === "/callback") {
-      let body = "";
-      req.on("data", (chunk) => (body += chunk.toString()));
-      req.on("end", () => {
-        try {
-          const { token, telegramUserId } = JSON.parse(body);
-          if (token && telegramUserId) {
-            setToken(telegramUserId, token);
-            console.log(`Token saved for user ${telegramUserId}`);
-            res.writeHead(200, { "Content-Type": "application/json" });
-            res.end(JSON.stringify({ success: true }));
-          } else {
-            res.writeHead(400, { "Content-Type": "application/json" });
-            res.end(JSON.stringify({ error: "Missing token or userId" }));
-          }
-        } catch {
-          res.writeHead(400, { "Content-Type": "application/json" });
-          res.end(JSON.stringify({ error: "Invalid request" }));
-        }
-      });
-      return;
-    }
-
-    res.writeHead(404);
-    res.end("Not found");
-  });
-
-  server.listen(AUTH_PORT, () => {
-    console.log(`Auth server running on port ${AUTH_PORT}`);
-  });
-
-  server.on("error", (err: NodeJS.ErrnoException) => {
-    if (err.code === "EADDRINUSE") {
-      console.error(`Auth port ${AUTH_PORT} is already in use`);
-    } else {
-      console.error(`Auth server error: ${err.message}`);
-    }
-  });
+  return new Response("Not found", { status: 404 });
 }
 
 export function getWebAppUrl(): string {
-  return process.env.AUTH_BASE_URL || `http://localhost:${AUTH_PORT}`;
+  return (
+    process.env.AUTH_BASE_URL ||
+    `http://localhost:${process.env.AUTH_PORT || "9876"}`
+  );
 }
 
-export function isHttps(): boolean {
-  const url = getWebAppUrl();
-  return url.startsWith("https://");
-}
+export { getMiniAppPage };

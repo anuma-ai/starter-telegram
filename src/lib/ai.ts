@@ -19,9 +19,9 @@ interface StreamChunk {
 export async function sendMessage(
   token: string,
   messages: ApiMessage[],
-  options: { signal?: AbortSignal } = {}
+  options: { signal?: AbortSignal; apiUrl?: string } = {}
 ): Promise<string> {
-  const apiUrl = process.env.ANUMA_API_URL || "https://portal.anuma-dev.ai";
+  const apiUrl = options.apiUrl || "https://portal.anuma-dev.ai";
 
   const requestBody = {
     model: "openai/gpt-5.2-2025-12-11",
@@ -101,17 +101,22 @@ export async function sendMessage(
   return fullResponse;
 }
 
-export async function chat(token: string, userMessage: string): Promise<string> {
+export async function chat(
+  token: string,
+  userMessage: string,
+  options: { apiUrl?: string } = {}
+): Promise<string> {
   const messages: ApiMessage[] = [
     { role: "user", content: [{ type: "text", text: userMessage }] },
   ];
-  return sendMessage(token, messages);
+  return sendMessage(token, messages, options);
 }
 
 export async function chatWithImage(
   token: string,
   imageBase64: string,
-  caption?: string
+  caption?: string,
+  options: { apiUrl?: string } = {}
 ): Promise<string> {
   const content: ContentPart[] = [
     { type: "image_url", image_url: { url: `data:image/jpeg;base64,${imageBase64}` } },
@@ -124,5 +129,5 @@ export async function chatWithImage(
   }
 
   const messages: ApiMessage[] = [{ role: "user", content }];
-  return sendMessage(token, messages);
+  return sendMessage(token, messages, options);
 }
