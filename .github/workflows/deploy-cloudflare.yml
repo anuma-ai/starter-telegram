@@ -29,14 +29,14 @@ jobs:
 
       - run: pnpm build:cloudflare
 
-      - name: Set worker secrets
-        run: |
-          echo '{"TELEGRAM_BOT_TOKEN":"${{ secrets.TELEGRAM_BOT_TOKEN }}","BOT_INFO":${{ secrets.BOT_INFO }},"AUTH_BASE_URL":"${{ secrets.WORKER_URL }}"}' | pnpm exec wrangler secret bulk
+      - run: pnpm exec wrangler deploy
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 
-      - run: pnpm exec wrangler deploy
+      - name: Set worker secrets
+        run: |
+          echo '{"TELEGRAM_BOT_TOKEN":"${{ secrets.TELEGRAM_BOT_TOKEN }}","BOT_INFO":${{ secrets.BOT_INFO }},"AUTH_BASE_URL":"${{ secrets.WORKER_URL }}"}' | pnpm exec wrangler secret bulk
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
