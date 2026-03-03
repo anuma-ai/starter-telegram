@@ -40,6 +40,10 @@ Create an app at [Privy Dashboard](https://dashboard.privy.io), then:
 - Under Authentication > Advanced, enable "Return user data in an identity token"
 - Copy the App ID into `PRIVY_APP_ID` in `.env`
 
+### Create an Anuma app
+
+Sign in at [dashboard.anuma.ai](https://dashboard.anuma.ai/) with the same Privy account and create an app. This provisions the API account that the bot uses for AI responses.
+
 ### Run the bot
 
 ```bash
