@@ -14,5 +14,12 @@
       "binding": "TOKEN_STORE",
       "id": "41b08151df72403892b71dc3f52225da"
     }
-  ]
+  ],
+  "observability": {
+    "enabled": true,
+    "logs": {
+      "enabled": true,
+      "invocation_logs": true
+    }
+  }
 }
