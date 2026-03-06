@@ -80,7 +80,6 @@ function langFromExt(filePath) {
 
 function collectFiles(dir, ext) {
   const files = [];
-  if (!existsSync(dir)) return files;
   for (const entry of readdirSync(dir, { withFileTypes: true })) {
     const full = join(dir, entry.name);
     if (entry.isDirectory()) files.push(...collectFiles(full, ext));
@@ -136,8 +135,10 @@ for (const srcFile of collectFiles(DOCS_SRC, ".md")) {
 }
 
 // Copy README into docs output.
-mkdirSync(DOCS_OUT, { recursive: true });
-copyFileSync("README.md", join(DOCS_OUT, "README.md"));
+if (existsSync("README.md")) {
+  mkdirSync(DOCS_OUT, { recursive: true });
+  copyFileSync("README.md", join(DOCS_OUT, "index.md"));
+}
 
 // Copy _meta.js navigation files.
 for (const src of collectFiles(DOCS_SRC, "_meta.js")) {
