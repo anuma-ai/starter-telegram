@@ -1,10 +1,19 @@
-# Anuma Telegram Bot Starter
+# Anuma Starter Telegram
 
-A starter template for building Telegram bots powered by [Anuma](https://anuma.ai). Handles authentication via [Privy](https://privy.io) and supports text and image messages out of the box.
+A starter template for building Telegram bots powered by
+[Anuma](https://anuma.ai). Handles authentication via
+[Privy](https://privy.io) and supports text and image messages out of the box.
 
 Try the live bot: [@anuma_ai_bot](https://t.me/anuma_ai_bot)
 
-## Quick Start
+## Getting Started
+
+### Create an Anuma app
+
+Sign in at [dashboard.anuma.ai](https://dashboard.anuma.ai/) and create an app.
+This provisions the API account that powers AI responses.
+
+### Clone and install
 
 ```bash
 git clone https://github.com/anuma-ai/starter-telegram.git
@@ -15,11 +24,15 @@ cp .env.example .env
 
 ### Create a Telegram bot
 
-Open [@BotFather](https://t.me/BotFather), run `/newbot`, and copy the token into `TELEGRAM_BOT_TOKEN` in `.env`. Use a separate bot for development — running locally switches the bot to polling mode, which deactivates any existing webhook.
+Open [@BotFather](https://t.me/BotFather), run `/newbot`, and copy the token
+into `TELEGRAM_BOT_TOKEN` in `.env`. Use a separate bot for development —
+running locally switches the bot to polling mode, which deactivates any existing
+webhook.
 
 ### Expose the auth server
 
-Telegram OAuth requires a public domain, so you need to expose the local auth server (port 9876) over HTTPS. For example, with ngrok:
+Telegram OAuth requires a public domain, so you need to expose the local auth
+server (port 9876) over HTTPS. For example, with ngrok:
 
 ```bash
 ngrok http 9876
@@ -29,7 +42,9 @@ Copy the HTTPS URL into `AUTH_BASE_URL` in `.env`.
 
 ### Configure the bot domain
 
-In [@BotFather](https://t.me/BotFather), go to `/mybots` → your bot → Bot Settings → Domain, and set it to your ngrok domain (without the `https://` prefix). This allows Telegram OAuth to work from your auth page.
+In [@BotFather](https://t.me/BotFather), go to `/mybots` → your bot → Bot
+Settings → Domain, and set it to your ngrok domain (without the `https://`
+prefix). This allows Telegram OAuth to work from your auth page.
 
 ### Set up Privy
 
@@ -37,12 +52,9 @@ Create an app at [Privy Dashboard](https://dashboard.privy.io), then:
 
 - Go to Login Methods and enable Telegram
 - In the Telegram settings, add your bot token so Privy can verify Telegram auth
-- Under Authentication > Advanced, enable "Return user data in an identity token"
+- Under Authentication > Advanced, enable "Return user data in an identity
+  token"
 - Copy the App ID into `PRIVY_APP_ID` in `.env`
-
-### Create an Anuma app
-
-Sign in at [dashboard.anuma.ai](https://dashboard.anuma.ai/) with the same Privy account and create an app. This provisions the API account that the bot uses for AI responses.
 
 ### Run the bot
 
