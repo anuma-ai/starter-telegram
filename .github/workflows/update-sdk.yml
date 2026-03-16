@@ -1,0 +1,65 @@
+name: Update SDK
+
+on:
+  schedule:
+    - cron: "0 6 * * *"
+  workflow_dispatch:
+
+jobs:
+  update-sdk:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.PAT_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          registry-url: "https://registry.npmjs.org"
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Check latest @anuma/sdk@next version
+        id: sdk
+        run: |
+          LATEST=$(npm view @anuma/sdk@next version)
+          CURRENT=$(node -e "console.log(require('./package.json').dependencies['@anuma/sdk'])")
+          echo "latest=$LATEST" >> $GITHUB_OUTPUT
+          echo "current=$CURRENT" >> $GITHUB_OUTPUT
+          echo "Latest: $LATEST"
+          echo "Current: $CURRENT"
+
+      - name: Update @anuma/sdk
+        if: steps.sdk.outputs.latest != steps.sdk.outputs.current
+        run: pnpm add @anuma/sdk@${{ steps.sdk.outputs.latest }}
+
+      - name: Create or update PR
+        if: steps.sdk.outputs.latest != steps.sdk.outputs.current
+        env:
+          GH_TOKEN: ${{ secrets.PAT_TOKEN }}
+        run: |
+          BRANCH="chore/update-sdk"
+          VERSION=${{ steps.sdk.outputs.latest }}
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git checkout -B "$BRANCH"
+          git add .
+          git commit -m "chore: update @anuma/sdk to $VERSION"
+          git push --force origin "$BRANCH"
+
+          EXISTING_PR=$(gh pr list --head "$BRANCH" --state open --json number -q '.[0].number')
+
+          if [ -n "$EXISTING_PR" ]; then
+            gh pr edit "$EXISTING_PR" --title "chore: update @anuma/sdk to $VERSION"
+          else
+            gh pr create \
+              --title "chore: update @anuma/sdk to $VERSION" \
+              --body "Updates \`@anuma/sdk\` to \`$VERSION\`." \
+              --head "$BRANCH" \
+              --base main
+          fi
