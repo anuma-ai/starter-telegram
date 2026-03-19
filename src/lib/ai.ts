@@ -1,3 +1,5 @@
+import { runToolLoop } from "@anuma/sdk/server";
+
 type TextContent = { type: "text"; text: string };
 type ImageContent = {
   type: "image_url";
@@ -10,70 +12,6 @@ interface ApiMessage {
   content: ContentPart[];
 }
 
-async function parseSSEStream(
-  body: ReadableStream<Uint8Array>,
-  format: "responses" | "completions"
-): Promise<string> {
-  const reader = body.getReader();
-  const decoder = new TextDecoder();
-  let fullResponse = "";
-  let buffer = "";
-
-  while (true) {
-    const { done, value } = await reader.read();
-    if (done) break;
-
-    buffer += decoder.decode(value, { stream: true });
-    const lines = buffer.split("\n");
-    buffer = lines.pop() || "";
-
-    for (const line of lines) {
-      if (line.startsWith("data: ")) {
-        const data = line.slice(6).trim();
-        if (data === "[DONE]") continue;
-
-        try {
-          const chunk = JSON.parse(data);
-
-          if (format === "responses") {
-            // Responses API streaming format
-            if (chunk.type === "response.output_text.delta" && chunk.delta) {
-              const delta = chunk.delta;
-              const deltaText =
-                typeof delta === "string" ? delta : delta.OfString;
-              if (deltaText) {
-                fullResponse += deltaText;
-              }
-            }
-
-            if (chunk.output) {
-              for (const item of chunk.output) {
-                if (item.type === "message" && item.content) {
-                  for (const part of item.content) {
-                    if (part.type === "output_text" && part.text) {
-                      fullResponse += part.text;
-                    }
-                  }
-                }
-              }
-            }
-          } else {
-            // Chat Completions streaming format
-            const delta = chunk.choices?.[0]?.delta?.content;
-            if (delta) {
-              fullResponse += delta;
-            }
-          }
-        } catch {
-          // Skip non-JSON lines
-        }
-      }
-    }
-  }
-
-  return fullResponse;
-}
-
 export async function sendMessage(
   token: string,
   messages: ApiMessage[],
@@ -81,32 +19,25 @@ export async function sendMessage(
 ): Promise<string> {
   const apiUrl = options.apiUrl || "https://portal.anuma-dev.ai";
 
-  const requestBody = {
+  const result = await runToolLoop({
+    messages: messages as any,
     model: "openai/gpt-5.2",
-    input: messages,
-    stream: true,
-  };
-
-  const response = await fetch(`${apiUrl}/api/v1/responses`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify(requestBody),
+    token,
+    baseUrl: apiUrl,
     signal: options.signal,
   });
 
-  if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(`API request failed: ${response.status} - ${errorText}`);
+  if (result.error) {
+    throw new Error(`API request failed: ${result.error}`);
   }
 
-  if (!response.body) {
-    throw new Error("No response body");
-  }
-
-  return parseSSEStream(response.body, "responses");
+  const d = result.data as any;
+  return (
+    d?.choices?.[0]?.message?.content ??
+    d?.output?.find?.((o: any) => o.type === "message")
+      ?.content?.find?.((c: any) => c.type === "output_text")?.text ??
+    ""
+  );
 }
 
 export async function chat(
