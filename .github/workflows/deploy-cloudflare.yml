@@ -53,6 +53,9 @@ jobs:
           curl -s "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/setWebhook?url=${{ secrets.WORKER_URL }}/webhook"
 
   deploy-preview:
+    permissions:
+      contents: read
+      pull-requests: write
     if: github.event_name == 'pull_request' && github.event.action != 'closed' && github.actor != 'dependabot[bot]'
     runs-on: ubuntu-latest
     steps:
@@ -148,6 +151,8 @@ jobs:
             }
 
   cleanup-preview:
+    permissions:
+      pull-requests: write
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
     runs-on: ubuntu-latest
     steps:
